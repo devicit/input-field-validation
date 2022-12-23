@@ -19,32 +19,29 @@ const checkIfAlreadyExist = (tableName, uniqueFields, cb) => {
 
     const errArray = [];
 
+    function createObjAndPush(field) {
+      let errObj = {
+        field: field.colName,
+        message: `${field.colName[0].toUpperCase() + field.colName.slice(1)}: ${
+          field.value
+        } already exist!`,
+      };
+
+      errArray.push(errObj);
+    }
+
     uniqueFields.forEach((field) => {
       for (let i = 0; i < dataArr.length; i++) {
         let colValue = dataArr[i][field.colName];
 
         if (typeof colValue == "string") {
           if (colValue.toLowerCase() == field.value.toLowerCase()) {
-            let errObj = {
-              field: field.colName,
-              message: `${
-                field.colName[0].toUpperCase() + field.colName.slice(1)
-              }: ${field.value} already exist!`,
-            };
-
-            errArray.push(errObj);
+            createObjAndPush(field);
             break;
           }
         } else {
           if (colValue == field.value) {
-            let errObj = {
-              field: field.colName,
-              message: `${
-                field.colName[0].toUpperCase() + field.colName.slice(1)
-              }: ${field.value} already exist!`,
-            };
-
-            errArray.push(errObj);
+            createObjAndPush(field);
             break;
           }
         }

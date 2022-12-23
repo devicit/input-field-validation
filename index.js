@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const connection = require("./config/db");
-const { isEmpty, isUnique } = require("./validator/validate");
+const { isEmpty, checkIfAlreadyExist } = require("./validator/validate");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -24,18 +24,12 @@ app.post("/add-student", (req, res, next) => {
     });
   }
 
-  connection.query("SELECT * FROM students", function (err, result) {
-    if (err) {
-      return next(err);
-    }
+  let uniqueFields = [
+    { colName: "roll", value: roll },
+    { colName: "name", value: name },
+  ];
 
-    let uniqueFields = [
-      { colName: "roll", value: roll },
-      { colName: "name", value: name },
-    ];
-
-    isUnique(result, uniqueFields, errArray);
-
+  checkIfAlreadyExist("students", uniqueFields, function (errArray) {
     if (errArray.length) {
       return res.json({
         success: false,

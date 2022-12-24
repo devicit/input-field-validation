@@ -14,7 +14,7 @@ const isEmpty = (field, value, errArray) => {
 const checkIfAlreadyExist = (tableName, uniqueFields, cb) => {
   connection.query(`SELECT * FROM ${tableName}`, function (err, dataArr) {
     if (err) {
-      return next(err);
+      return cb({ status: 500, error: err });
     }
 
     const errArray = [];
@@ -22,9 +22,9 @@ const checkIfAlreadyExist = (tableName, uniqueFields, cb) => {
     function createObjAndPush(field) {
       let errObj = {
         field: field.colName,
-        message: `${field.colName[0].toUpperCase() + field.colName.slice(1)}: ${
-          field.value
-        } already exist!`,
+        message: `${
+          field.colName[0].toUpperCase() + field.colName.slice(1)
+        }: ${field.value.trim()} already exist!`,
       };
 
       errArray.push(errObj);
@@ -35,7 +35,9 @@ const checkIfAlreadyExist = (tableName, uniqueFields, cb) => {
         let colValue = dataArr[i][field.colName];
 
         if (typeof colValue == "string") {
-          if (colValue.toLowerCase() == field.value.toLowerCase()) {
+          if (
+            colValue.toLowerCase().trim() == field.value.toLowerCase().trim()
+          ) {
             createObjAndPush(field);
             break;
           }
@@ -48,7 +50,11 @@ const checkIfAlreadyExist = (tableName, uniqueFields, cb) => {
       }
     });
 
-    cb(errArray);
+    if (errArray.length) {
+      cb({ status: 400, errArray });
+    } else {
+      cb({ status: 200 });
+    }
   });
 };
 

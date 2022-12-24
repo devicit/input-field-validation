@@ -29,11 +29,15 @@ app.post("/add-student", (req, res, next) => {
     { colName: "name", value: name },
   ];
 
-  checkIfAlreadyExist("students", uniqueFields, function (errArray) {
-    if (errArray.length) {
+  checkIfAlreadyExist("students", uniqueFields, function (response) {
+    if (response.status == 500) {
+      return next(response.error);
+    }
+
+    if (response.status == 400) {
       return res.json({
         success: false,
-        error: errArray,
+        error: response.errArray,
       });
     }
 
@@ -57,8 +61,8 @@ app.post("/add-student", (req, res, next) => {
   });
 });
 
-app.use((err, req, res) => {
-  console.log(err.message);
+app.use((err, req, res, next) => {
+  console.log(err);
 
   res.json({
     success: false,
